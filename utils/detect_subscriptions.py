@@ -34,34 +34,40 @@ def detect_recurring_payments(df: pd.DataFrame,
     grouped = df.groupby("merchant")
 
     for merchant_name, merchant_df in grouped:
-        # look at transactions tagged as 'subscription' 
-        sub_txns = merchant_df[merchant_df["type"] == "subscription"]
 
-        if len(sub_txns) < min_occurrences:
+        if len(merchant_df) < min_occurrences:
             # Not enough occurrences to call it recurring — skip
             continue
 
+        #coefficient of variation = std/mean , subscription amounts shouldnt have alot of variation
+        amount_cv = merchant_df["amount"].std() / merchant_df["amount"].mean()
+        if amount_cv > 0.05:
+            continue
+
         # Sort payments by date to measure gaps in order
-        sub_txns = sub_txns.sort_values("date")
-
-        gaps = sub_txns["date"].diff().dt.days.dropna()
+        merchant_df = merchant_df.sort_values("date")
+        gaps = merchant_df["date"].diff().dt.days.dropna()
+        if len(gaps) == 0:
+            continue
+    
         avg_gap = gaps.mean()  
-
         lower_bound = interval_days - tolerance_days 
         upper_bound = interval_days + tolerance_days  
 
-        if lower_bound <= avg_gap <= upper_bound:
-            subscriptions_found.append({
-                "merchant":       merchant_name,
-                "monthly_cost":   sub_txns["amount"].iloc[0],
-                # iloc[0] coz all amounts are same for a subscription
-                "occurrences":    len(sub_txns),
-                "avg_gap_days":   round(avg_gap, 1),
-                "category":       sub_txns["category"].iloc[0],
-                "first_seen":     sub_txns["date"].min().strftime("%Y-%m-%d"),
-                "last_seen":      sub_txns["date"].max().strftime("%Y-%m-%d"),
-                "annual_cost":    sub_txns["amount"].iloc[0] * 12,
-            })
+        if not (lower_bound <= avg_gap <= upper_bound):
+            continue
+
+        # this is a subscription
+        subscriptions_found.append({
+            "merchant":     merchant_name,
+            "monthly_cost": round(merchant_df["amount"].mean(), 0),
+            "occurrences":  len(merchant_df),
+            "avg_gap_days": round(avg_gap, 1),
+            "category":     merchant_df["category"].mode()[0],
+            "first_seen":   merchant_df["date"].min().strftime("%Y-%m-%d"),
+            "last_seen":    merchant_df["date"].max().strftime("%Y-%m-%d"),
+            "annual_cost":  round(merchant_df["amount"].mean() * 12, 0),
+        })
 
     # Convert the list of dicts into a DataFrame, sorted by most expensive first
     result_df = pd.DataFrame(subscriptions_found)
@@ -101,10 +107,12 @@ def print_subscription_report(subscriptions: pd.DataFrame) -> None:
 
 # ENTRY POINT
 if __name__ == "__main__":
-    df = load_transactions("data/transactions.csv")
+    import os
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    transactions_path = os.path.join(base_dir, "data", "transactions.csv")
+    subscriptions_path = os.path.join(base_dir, "data", "subscriptions.csv")
+    df = load_transactions(transactions_path)
     subscriptions = detect_recurring_payments(df)
     print_subscription_report(subscriptions)
-
-    # Save detected subscriptions to their own CSV 
-    subscriptions.to_csv("data/subscriptions.csv", index=False)
-    print(f"\nSaved to data/subscriptions.csv")
+    subscriptions.to_csv(subscriptions_path, index=False)
+    print(f"\nSaved to {subscriptions_path}")

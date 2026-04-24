@@ -35,3 +35,10 @@ jobs:
       # Step 5: Run your subscription detector
       - name: Run subscription detector
         run: python utils/detect_subscriptions.py
+
+      # Step 6: Run usage inference engine
+      - name: Run usage inference
+        run: |
+          cd utils
+          python infer_usage.py
+          cd ..  
