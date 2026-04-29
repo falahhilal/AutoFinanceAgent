@@ -9,6 +9,10 @@ __pycache__/
 # Data files
 data/transactions.csv
 data/subscriptions.csv
+data/agent_report.csv
+data/usage_report.csv
+data/letters/
+data/ledger_summary.json
 
 # OS files
 .DS_Store

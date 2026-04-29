@@ -42,3 +42,16 @@ jobs:
           cd utils
           python infer_usage.py
           cd ..  
+
+      # Step 7:Validate agent syntax
+      - name: Validate agent syntax
+        run: python -m py_compile agents/subscription_agent.py
+
+      - name: Validate action layer syntax
+        run: python -m py_compile agents/action_layer.py
+
+      - name: Validate feedback module
+        run: python -m py_compile agents/feedback.py
+
+      - name: Validate dashboard
+        run: python -m py_compile dashboard/app.py

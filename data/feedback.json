@@ -1,0 +1,14 @@
+{
+  "Adobe Creative": {
+    "overrides": [
+      "keep",
+      "keep"
+    ],
+    "agent_decisions": [
+      "cancel",
+      "cancel"
+    ],
+    "last_updated": "2026-04-29",
+    "user_note": "I use this for client design work"
+  }
+}

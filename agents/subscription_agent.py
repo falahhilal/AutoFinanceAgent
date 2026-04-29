@@ -97,7 +97,7 @@ Return the JSON object only. No markdown code blocks. No explanation. Just the r
     return prompt
 
 
-# ── SINGLE SUBSCRIPTION ANALYSIS ───────────────────────────────────────────────
+#SINGLE SUBSCRIPTION ANALYSIS
 def analyze_subscription(subscription_row: pd.Series, transactions: pd.DataFrame) -> dict:
     """
     Sends one subscription's context to Gemini and parses the JSON response.
@@ -170,7 +170,7 @@ def analyze_subscription(subscription_row: pd.Series, transactions: pd.DataFrame
     return result
 
 
-# ── FULL ANALYSIS RUN ───────────────────────────────────────────────────────────
+# FULL ANALYSIS RUN
 def run_agent_analysis(usage_report: pd.DataFrame, transactions: pd.DataFrame) -> pd.DataFrame:
     """
     Loops through every subscription, runs Gemini analysis on each one,
@@ -208,7 +208,7 @@ def run_agent_analysis(usage_report: pd.DataFrame, transactions: pd.DataFrame) -
     return final_df
 
 
-# ── REPORT PRINTER ──────────────────────────────────────────────────────────────
+#REPORT PRINTER 
 def print_agent_report(final_df: pd.DataFrame) -> None:
     """
     Prints the final AI analysis report to the terminal.
@@ -249,7 +249,7 @@ def print_agent_report(final_df: pd.DataFrame) -> None:
     print("=" * 70 + "\n")
 
 
-# ── ENTRY POINT ─────────────────────────────────────────────────────────────────
+#ENTRY POINT
 if __name__ == "__main__":
     import sys
 
