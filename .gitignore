@@ -1,22 +1,24 @@
 # Virtual environment
 venv/
 
-# Python cache files
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
 
-# Data files
+# All generated data files
 data/transactions.csv
 data/subscriptions.csv
 data/agent_report.csv
 data/usage_report.csv
-data/letters/
 data/ledger_summary.json
+data/simulation_metadata.json
+data/feedback.json
+data/letters/
 
 # OS files
 .DS_Store
 Thumbs.db
 
-# Environment variables 
+# Environment variables — NEVER commit this
 .env

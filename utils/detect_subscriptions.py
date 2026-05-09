@@ -105,12 +105,12 @@ def print_subscription_report(subscriptions: pd.DataFrame) -> None:
     print(f"  TOTAL MONTHLY  : {total_monthly:,.0f} PKR")
     print(f"  TOTAL ANNUAL   : {total_annual:,.0f} PKR")
 
-# ENTRY POINT
 if __name__ == "__main__":
     import os
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    transactions_path = os.path.join(base_dir, "data", "transactions.csv")
+    transactions_path  = os.path.join(base_dir, "data", "transactions.csv")
     subscriptions_path = os.path.join(base_dir, "data", "subscriptions.csv")
+
     df = load_transactions(transactions_path)
     subscriptions = detect_recurring_payments(df)
     print_subscription_report(subscriptions)

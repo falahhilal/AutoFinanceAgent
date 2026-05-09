@@ -9,10 +9,14 @@ sys.path.insert(0, os.path.join(base_dir, "utils"))
 sys.path.insert(0, os.path.join(base_dir, "agents"))
 
 from detect_subscriptions import load_transactions, detect_recurring_payments      #type: ignore
-from infer_usage import infer_subscription_usage      #type: ignore
-from subscription_agent import run_agent_analysis      #type: ignore
-from action_layer import simulate_ledger, whatif_simulation #type: ignore
-from feedback import load_feedback, record_override, apply_feedback_to_report #type: ignore
+from infer_usage import infer_subscription_usage   #type: ignore
+from subscription_agent import run_agent_analysis  #type: ignore
+from action_layer import simulate_ledger, whatif_simulation  #type: ignore
+from feedback import load_feedback, record_override, apply_feedback_to_report   #type: ignore
+import sys
+import os as _os
+sys.path.insert(0, _os.path.join(base_dir, "data"))
+from generate_transactions import generate_transactions   #type: ignore
 
 # ── PAGE CONFIG ────────────────────────────────────────────────────────────────
 st.set_page_config(
@@ -102,6 +106,7 @@ st.markdown("""
 TRANSACTIONS_PATH = os.path.join(base_dir, "data", "transactions.csv")
 FEEDBACK_PATH     = os.path.join(base_dir, "data", "feedback.json")
 LETTERS_DIR       = os.path.join(base_dir, "data", "letters")
+METADATA_PATH     = os.path.join(base_dir, "data", "simulation_metadata.json")
 
 
 # ── PIPELINE (cached) ──────────────────────────────────────────────────────────
@@ -145,12 +150,40 @@ with st.sidebar:
     # e.g. "📋  Subscriptions" — we'll use this to decide what to render
 
     st.divider()
+    st.markdown("**Simulation**")
 
-    # Re-run pipeline button
-    if st.button("🔄 Refresh Analysis", use_container_width=True):
+    if st.button("🎲 Run New Simulation", use_container_width=True,
+                 type="primary"):
+        # Generate fresh randomized transaction data
+        with st.spinner("Generating new data..."):
+            df, metadata = generate_transactions(months=6)
+            # Save transactions CSV
+            df.to_csv(TRANSACTIONS_PATH, index=False)
+            # Save metadata JSON
+            import json as _json
+            with open(METADATA_PATH, "w") as f:
+                _json.dump(metadata, f, indent=2)
+        # Clear pipeline cache so it reruns with the new data
         st.cache_data.clear()
-        # Clears ALL cached data so the pipeline reruns with fresh LLM calls
+        st.success(f"New simulation ready — profile: **{metadata['profile']}**")
         st.rerun()
+        # st.rerun() refreshes the whole app with fresh data
+
+    # Show current simulation info if metadata exists
+    if os.path.exists(METADATA_PATH):
+        import json as _json
+        with open(METADATA_PATH) as f:
+            meta = _json.load(f)
+        st.markdown(f"""
+        <div style='font-size:0.75rem; color:#666; margin-top:0.5rem;
+                    background:#1a1a2e; border-radius:8px; padding:0.6rem;'>
+            <strong style='color:#888'>Current profile:</strong><br>
+            {meta['profile'].title()}<br>
+            <span style='color:#555'>{meta['description']}</span><br><br>
+            <strong style='color:#888'>Generated:</strong><br>
+            <span style='color:#555'>{meta['generated_at']}</span>
+        </div>
+        """, unsafe_allow_html=True)
 
     st.divider()
 
