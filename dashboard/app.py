@@ -114,8 +114,24 @@ METADATA_PATH     = os.path.join(base_dir, "data", "simulation_metadata.json")
 def run_pipeline():
     """
     Runs Phase 1 → 2 → 3 once and caches the result for 5 minutes.
-    Prevents re-calling the LLM on every single UI interaction.
+    If no transaction data exists yet (first run in Docker or fresh clone),
+    generates it automatically so the app always has data to work with.
     """
+
+    # Auto-generate transaction data if it doesn't exist
+    # This handles first-run inside Docker where no CSV was copied in
+    if not os.path.exists(TRANSACTIONS_PATH):
+        import json as _json
+        df, metadata = generate_transactions(months=6)
+        # generate_transactions() returns both the DataFrame and metadata
+        os.makedirs(os.path.join(base_dir, "data"), exist_ok=True)
+        # Make sure the data/ directory exists inside the container
+        df.to_csv(TRANSACTIONS_PATH, index=False)
+        with open(METADATA_PATH, "w") as f:
+            _json.dump(metadata, f, indent=2)
+        # os.path.exists checks if the file is there before trying to read it
+        # This block only runs once — after that the CSV exists and gets skipped
+
     transactions  = load_transactions(TRANSACTIONS_PATH)
     subscriptions = detect_recurring_payments(transactions)
     usage_report  = infer_subscription_usage(subscriptions, transactions)

@@ -1,0 +1,16 @@
+# Don't copy these into the Docker image
+venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+.git
+.gitignore
+data/transactions.csv
+data/subscriptions.csv
+data/agent_report.csv
+data/usage_report.csv
+data/ledger_summary.json
+data/simulation_metadata.json
+data/feedback.json
+data/letters/
