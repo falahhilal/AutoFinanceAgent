@@ -31,6 +31,7 @@ jobs:
       # Step 4: Run your transaction generator
       - name: Generate transaction data
         run: python data/generate_transactions.py
+        working-directory: ${{ github.workspace }}
 
       # Step 5: Run your subscription detector
       - name: Run subscription detector
@@ -38,10 +39,8 @@ jobs:
 
       # Step 6: Run usage inference engine
       - name: Run usage inference
-        run: |
-          cd utils
-          python infer_usage.py
-          cd ..  
+        run: python utils/infer_usage.py
+        working-directory: ${{ github.workspace }} 
 
       # Step 7:Validate agent syntax
       - name: Validate agent syntax
